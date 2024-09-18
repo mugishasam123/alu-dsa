@@ -31,16 +31,9 @@ class UniqueInt:
 
                 for line in input_file:
                     line = line.strip()
-                    if line == "":
-                        continue
-                    
-                    # Split the line and process
-                    parts = line.split()
-                    if len(parts) != 1:
-                        continue
                     
                     try:
-                        number = int(parts[0])
+                        number = int(line)
                     except ValueError:
                         continue
                     
