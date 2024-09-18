@@ -1,9 +1,7 @@
-#!/usr/bin/python3
-
-from os import path
+import os
 import time
 import psutil
-
+import sys
 
 class UniqueInt:
     """
@@ -11,49 +9,41 @@ class UniqueInt:
     """
 
     def __init__(self):
-        # We will use a boolean array of size 2047 to represent the integers from -1023 to 1023
-        # Index 0 corresponds to -1023, and index 2046 corresponds to 1023
+        # Boolean array of size 2047 to represent the integers from -1023 to 1023
         self.seen = [False] * 2047
 
     def process_file(self, input_file_name, output_file_name):
         """
-        Reads integers from the input file, identifies unique integers, sorts them, and writes them to the output file.
-        :param input_file_path: Path to the input file containing integers.
-        :param output_file_path: Path to the output file where unique integers will be written.
+        Reads integers from the input file, identifies unique integers, sorts them, 
+        and writes them to the output file.
+        :param input_file_name: Name of the input file containing integers.
+        :param output_file_name: Name of the output file where unique integers will be written.
         """
         try:
-            input_file_path = self.getFilePath(input_file_name)
-            output_file_path = self.getFilePath(output_file_name)
+            input_file_path = self.get_file_path(input_file_name)
+            output_file_path = self.get_file_path(output_file_name)
 
-            with open(input_file_path, "r") as input_file:
-                # Collect unique numbers
-                unique_numbers = []
+            # Collect unique numbers
+            for line in self.read_input_file(input_file_path):
+                line = line.strip()
 
-                for line in input_file:
-                    line = line.strip()
-                    
-                    try:
-                        number = int(line)
-                    except ValueError:
-                        continue
-                    
-                    if -1023 <= number <= 1023:
-                        if not self.is_seen(number):
-                            self.mark_as_seen(number)
-                            unique_numbers.append(number)
-                
-                # Sort unique numbers using quicksort
-                self.sort(unique_numbers, 0, len(unique_numbers) - 1)
-                
-                # Write sorted unique numbers to the output file
-                with open(output_file_path, "w") as output_file:
-                    for number in unique_numbers:
-                        output_file.write(f"{number}\n")
+                try:
+                    number = int(line)
+                    if -1023 <= number <= 1023 and not self.is_seen(number):
+                        self.mark_as_seen(number)
+                except ValueError:
+                    # Skipping invalid lines that cannot be converted to int
+                    continue
+            
+            # Write unique numbers directly to the output file as they are found
+            self.write_unique_numbers_directly(output_file_path)
 
         except FileNotFoundError:
-            print(f"Error: File '{input_file_path}' not found.")
+            print(f"Error: File '{input_file_name}' not found.")
+        except OSError as e:
+            print(f"File error: {str(e)}")
         except Exception as e:
-            print(f"An error occurred: {str(e)}")
+            print(f"An unexpected error occurred: {str(e)}")
 
     def is_seen(self, number):
         """
@@ -72,54 +62,50 @@ class UniqueInt:
         index = number + 1023
         self.seen[index] = True
 
-    def sort(self, arr, low, high):
+    def write_unique_numbers_directly(self, file_path):
         """
-        Sorts an array in ascending order using quicksort.
-        :param arr: The array to sort.
-        :param low: The starting index of the segment to sort.
-        :param high: The ending index of the segment to sort.
+        Writes unique integers directly to the output file.
+        :param file_path: The path to the output file.
         """
-        if low < high:
-            # pi is the partitioning index
-            pi = self.partition(arr, low, high)
+        try:
+            with open(file_path, "w") as output_file:
+                for i, seen in enumerate(self.seen):
+                    if seen:
+                        output_file.write(f"{i - 1023}\n") 
+        except OSError as e:
+            print(f"Error writing to file '{file_path}': {str(e)}")
 
-            # Recursively sort elements before partition and after partition
-            self.sort(arr, low, pi - 1)
-            self.sort(arr, pi + 1, high)
-
-    def partition(self, arr, low, high):
+    def read_input_file(self, file_path):
         """
-        Partition function for quicksort. Places the pivot element at the correct position
-        in the sorted array and places all smaller elements to the left and larger elements to the right.
-        :param arr: The array to partition.
-        :param low: The starting index of the segment.
-        :param high: The ending index of the segment.
-        :return: The partition index.
+        Reads lines from the input file.
+        :param file_path: The path to the input file.
+        :return: Generator of lines from the file.
         """
-        pivot = arr[high]  # Pivot element
-        i = low - 1        # Index of smaller element
-
-        for j in range(low, high):
-            if arr[j] < pivot:
-                i += 1
-                # Swap arr[i] and arr[j]
-                arr[i], arr[j] = arr[j], arr[i]
-
-        # Swap arr[i+1] and arr[high] (or pivot)
-        arr[i + 1], arr[high] = arr[high], arr[i + 1]
-
-        return i + 1
+        try:
+            with open(file_path, "r") as input_file:
+                for line in input_file:
+                    yield line
+        except OSError as e:
+            print(f"Error reading file '{file_path}': {str(e)}")
     
-    def getFilePath(self,file_name):
-        file_path = path.relpath("dsa/hw01" + file_name)
-        return file_path 
-
-
+    def get_file_path(self, file_name):
+        """
+        Constructs the full file path using os.path.join for platform independence.
+        :param file_name: The file name to append to the base path.
+        :return: Full file path.
+        """
+        base_path = os.path.join("dsa", "hw01")
+        file_path = os.path.join(base_path, file_name)
+        return file_path
 
 if __name__ == "__main__":
-    
-    input_file_path ="/sample_inputs/sample_01.txt"
-    output_file_path = "/sample_results/sample_01.txt_results.txt"
+    # If command line arguments are provided, use them; otherwise use defaults
+    if len(sys.argv) >= 3:
+        input_file_name = sys.argv[1]
+        output_file_name = sys.argv[2]
+    else:
+        input_file_name = "sample_inputs/sample_01.txt"
+        output_file_name = "sample_results/sample_01.txt_results.txt"
 
     unique_int = UniqueInt()
 
@@ -127,12 +113,12 @@ if __name__ == "__main__":
     start_time = time.time()
 
     # Process file
-    unique_int.process_file(input_file_path, output_file_path)
+    unique_int.process_file(input_file_name, output_file_name)
 
     # End time measurement
     end_time = time.time()
 
-    # Calculate memory usage
+    # Calculate memory usage (RSS: non-swapped physical memory the process is using)
     process = psutil.Process()
     memory_usage = process.memory_info().rss / 1024  # Memory usage in KB
 
