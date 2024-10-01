@@ -4,7 +4,6 @@ class SparseMatrix:
     def __init__(self, file_path=None, rows=0, cols=0):
         """
         Initialize a SparseMatrix.
-        
         Args:
             file_path (str): Path to the file containing matrix data (optional).
             rows (int): Number of rows in the matrix.
@@ -20,12 +19,8 @@ class SparseMatrix:
     def read_matrix(self, file_path):
         """
         Read a sparse matrix from a file and populate the matrix.
-        
         Args:
             file_path (str): Path to the input file.
-        
-        Raises:
-            ValueError: If the file format is incorrect.
         """
         try:
             with open(file_path, 'r', encoding='utf-8') as file:
@@ -45,7 +40,6 @@ class SparseMatrix:
     def set_element(self, row, col, value):
         """
         Set an element in the matrix. Adds it if non-zero, removes if zero.
-        
         Args:
             row (int): The row index.
             col (int): The column index.
@@ -59,11 +53,9 @@ class SparseMatrix:
     def get_element(self, row, col):
         """
         Get an element from the matrix.
-        
         Args:
             row (int): The row index.
             col (int): The column index.
-        
         Returns:
             int: The value at the specified position, or 0 if not found.
         """
@@ -72,45 +64,30 @@ class SparseMatrix:
     def __add__(self, other):
         """
         Perform element-wise addition of two matrices.
-        
         Args:
             other (SparseMatrix): The matrix to add.
-        
         Returns:
             SparseMatrix: The resulting matrix from the addition.
-        
-        Raises:
-            ValueError: If the dimensions of the matrices do not match.
         """
         return self._elementwise_operation(other, operation="add")
 
     def __sub__(self, other):
         """
         Perform element-wise subtraction of two matrices.
-        
         Args:
             other (SparseMatrix): The matrix to subtract.
-        
         Returns:
             SparseMatrix: The resulting matrix from the subtraction.
-        
-        Raises:
-            ValueError: If the dimensions of the matrices do not match.
         """
         return self._elementwise_operation(other, operation="sub")
 
     def __mul__(self, other):
         """
         Perform matrix multiplication.
-        
         Args:
             other (SparseMatrix): The matrix to multiply with.
-        
         Returns:
             SparseMatrix: The resulting matrix from the multiplication.
-        
-        Raises:
-            ValueError: If the matrices' dimensions are incompatible for multiplication.
         """
         if self.num_cols != other.num_rows:
             raise ValueError("Matrix multiplication not possible, column of first must match rows of second")
@@ -125,17 +102,11 @@ class SparseMatrix:
     def _elementwise_operation(self, other, operation):
         """
         Perform element-wise addition or subtraction of two matrices.
-        
         Args:
             other (SparseMatrix): The other matrix to operate on.
             operation (str): The operation type ("add" or "sub").
-        
         Returns:
             SparseMatrix: The resulting matrix from the operation.
-        
-        Raises:
-            ValueError: If the dimensions of the matrices do not match.
-            ValueError: If an unsupported operation is passed.
         """
         if self.num_rows != other.num_rows or self.num_cols != other.num_cols:
             raise ValueError("Matrices must have the same dimensions for addition/subtraction")
@@ -162,7 +133,6 @@ class SparseMatrix:
     def save_to_file(self, output_file):
         """
         Save the sparse matrix to a file.
-        
         Args:
             output_file (str): Path to the output file.
         """
